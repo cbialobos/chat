@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>Socket.io</title>
+    </head>
+ 
+    <body>
+        <h1>Communication avec socket.io !</h1>
+
+        <p><input type="text" value="Votre message..." />
+            <button type="button" onclick="log('salut server')">Envoyer</button>
+        </p>
+
+        <table id="Result">
+        </table>
+
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+            var socket = io.connect('http://localhost:8080');
+        
+            // On demande le pseudo au visiteur...
+            var pseudo = prompt('Quel est votre pseudo ?');
+            // Et on l'envoie avec le signal "petit_nouveau" (pour le différencier de "message")
+            socket.emit('join', pseudo);
+            document.title = pseudo + ' - Super chat temps réel'
+
+            socket.on('join', function(nickname) {
+                //alert('User join : ' + nickname);
+                document.getElementById('Result').appendChild('<tr><i>' + nickname + ' join</i></tr>')
+            })
+
+            .on('left', function(nickname) {
+                //alert('User left : ' + nickname);
+                document.getElementById('Result').appendChild('<tr><i>' + nickname + ' left</i></tr>')
+            })
+
+            .on('message', function(message) {
+                //alert(message.username + ' said ' + message.message);
+                document.getElementById('Result').appendChild('<tr><b>' + nickname + ' </b>' + message + '</tr>')
+            });
+
+            function log(message){
+                socket.emit('message', message)
+            }
+        </script>
+    </body>
+</html>
