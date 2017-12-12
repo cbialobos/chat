@@ -3,6 +3,17 @@
     <head>
         <meta charset="utf-8" />
         <title>Socket.io</title>
+        <style>
+            LI.message {
+                text-decoration: none; 
+                background-color: black;
+                color: rgb(255, 0, 0);
+                }
+            LI.joinleft {
+                font-style: italic;
+                color:grey;
+            }
+        </style>
     </head>
  
     <body>
@@ -12,7 +23,7 @@
             <button id="submit" type="submit" onclick="log()">Envoyer</button>
         </p>
 
-        <ul id="Result">
+        <ul id="Result" style="list-style-type:none">
         </ul>
 
         <script src="/socket.io/socket.io.js"></script>
@@ -31,18 +42,27 @@
             document.title = pseudo + ' - Super chat temps réel'
 
             socket.on('join', function(nickname) {
+                var italicNode = document.createElement("i");
                 var textnode = document.createTextNode(nickname + ' joined');
-                appendChild(textnode);
+                italicNode.appendChild(textnode)
+                appendChild(italicNode);
             })
 
             .on('left', function(nickname) {
+                var italicNode = document.createElement("i");
                 var textnode = document.createTextNode(nickname + ' has left');
-                appendChild(textnode);
+                italicNode.appendChild(textnode)
+                appendChild(italicNode);
             })
 
             .on('message', function(source) {
-                var textnode = document.createTextNode(source.username + ' ' + source.message);
-                appendChild(textnode);
+                var groupNode = document.createElement();
+
+                var styleNode = document.createElement(a);
+                styleNode.appendChild(document.createTextNode(source.username));
+                groupNode.appendChild(styleNode);
+                groupNode.appendChild(document.createTextNode(source.message));
+                appendChild(groupNode);
             });
 
             function log(){
@@ -58,6 +78,7 @@
 
             function appendChild(child) {
                 var node = document.createElement("LI");
+                node.setAttribute("class", "message");
                 node.appendChild(child);
                 document.getElementById("Result").appendChild(node); 
             }
