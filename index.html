@@ -8,40 +8,58 @@
     <body>
         <h1>Communication avec socket.io !</h1>
 
-        <p><input type="text" value="Votre message..." />
-            <button type="button" onclick="log('salut server')">Envoyer</button>
+        <p><input type="text" placeholder="Votre message..." id="message" autofocus/>
+            <button id="submit" type="submit" onclick="log()">Envoyer</button>
         </p>
 
-        <table id="Result">
-        </table>
+        <ul id="Result">
+        </ul>
 
         <script src="/socket.io/socket.io.js"></script>
         <script>
+            document.getElementById("message").addEventListener("keyup", function(event) {
+                event.preventDefault();
+                if (event.keyCode === 13) {
+                    document.getElementById("submit").click();
+                }
+            });
+
             var socket = io.connect('http://localhost:8080');
-        
-            // On demande le pseudo au visiteur...
+
             var pseudo = prompt('Quel est votre pseudo ?');
-            // Et on l'envoie avec le signal "petit_nouveau" (pour le différencier de "message")
             socket.emit('join', pseudo);
             document.title = pseudo + ' - Super chat temps réel'
 
             socket.on('join', function(nickname) {
-                //alert('User join : ' + nickname);
-                document.getElementById('Result').appendChild('<tr><i>' + nickname + ' join</i></tr>')
+                var textnode = document.createTextNode(nickname + ' joined');
+                appendChild(textnode);
             })
 
             .on('left', function(nickname) {
-                //alert('User left : ' + nickname);
-                document.getElementById('Result').appendChild('<tr><i>' + nickname + ' left</i></tr>')
+                var textnode = document.createTextNode(nickname + ' has left');
+                appendChild(textnode);
             })
 
-            .on('message', function(message) {
-                //alert(message.username + ' said ' + message.message);
-                document.getElementById('Result').appendChild('<tr><b>' + nickname + ' </b>' + message + '</tr>')
+            .on('message', function(source) {
+                var textnode = document.createTextNode(source.username + ' ' + source.message);
+                appendChild(textnode);
             });
 
-            function log(message){
-                socket.emit('message', message)
+            function log(){
+                var messageObject = document.getElementById("message");
+                var message = messageObject.value;
+                messageObject.value = '';
+                document.getElementById("message").value;
+                socket.emit('message', message);
+                var textnode = document.createTextNode(pseudo + ' ' + message);            
+                appendChild(textnode);
+                messageObject.focus();
+            }
+
+            function appendChild(child) {
+                var node = document.createElement("LI");
+                node.appendChild(child);
+                document.getElementById("Result").appendChild(node); 
             }
         </script>
     </body>

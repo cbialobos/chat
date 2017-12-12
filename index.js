@@ -25,15 +25,17 @@ io.sockets.on('connection', function (socket) {
     })
 
     .on('message', function(message) {
-        console.log(socket.username + ': said ' + message);
+        const username = socket.username;
+
+        console.log(username + ': said ' + message);
         
-        socket.broadcast.emit('message', {source: socket.source, message: message});
+        socket.broadcast.emit('message', {username: username, message: message});
     })
 
-    .on('close', function() {
+    .on('disconnect', function() {
         console.log(socket.username + ': left the chat');
         
-        socket.broadcast.emit('quit', socket.username);
+        socket.broadcast.emit('left', socket.username);
     })
 })
 
