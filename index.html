@@ -4,12 +4,13 @@
         <meta charset="utf-8" />
         <title>Socket.io</title>
         <style>
-            LI.message {
+            strong {
                 text-decoration: none; 
                 background-color: black;
-                color: rgb(255, 0, 0);
+                color: rgb(255, 255, 255);
+                margin: 15;
                 }
-            LI.joinleft {
+            em {
                 font-style: italic;
                 color:grey;
             }
@@ -19,68 +20,45 @@
     <body>
         <h1>Communication avec socket.io !</h1>
 
-        <p><input type="text" placeholder="Votre message..." id="message" autofocus/>
-            <button id="submit" type="submit" onclick="log()">Envoyer</button>
-        </p>
+        <form action="/" method="post" id="formulaire_chat">
+            <input type="text" name="message" id="message" placeholder="Votre message..." size="50" autofocus />
+            <input type="submit" id="submit" value="Envoyer" />
+        </form>
 
-        <ul id="Result" style="list-style-type:none">
+        <ul id="result" style="list-style-type:none">
         </ul>
 
+        <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
         <script src="/socket.io/socket.io.js"></script>
         <script>
-            document.getElementById("message").addEventListener("keyup", function(event) {
-                event.preventDefault();
-                if (event.keyCode === 13) {
-                    document.getElementById("submit").click();
-                }
-            });
-
-            var socket = io.connect('http://localhost:8080');
+            var socket = io();
 
             var pseudo = prompt('Quel est votre pseudo ?');
             socket.emit('join', pseudo);
-            document.title = pseudo + ' - Super chat temps réel'
+            document.title = pseudo + ' - ' + document.title;
 
             socket.on('join', function(nickname) {
-                var italicNode = document.createElement("i");
-                var textnode = document.createTextNode(nickname + ' joined');
-                italicNode.appendChild(textnode)
-                appendChild(italicNode);
+                $('#result').prepend('<p><em>' + nickname + ' joigned</em></p>');
             })
 
             .on('left', function(nickname) {
-                var italicNode = document.createElement("i");
-                var textnode = document.createTextNode(nickname + ' has left');
-                italicNode.appendChild(textnode)
-                appendChild(italicNode);
+                $('#result').prepend('<p><em>' + nickname + ' has left</em></p>');
             })
 
             .on('message', function(source) {
-                var groupNode = document.createElement();
-
-                var styleNode = document.createElement(a);
-                styleNode.appendChild(document.createTextNode(source.username));
-                groupNode.appendChild(styleNode);
-                groupNode.appendChild(document.createTextNode(source.message));
-                appendChild(groupNode);
+                insereMessage(source.username, source.message);
             });
 
-            function log(){
-                var messageObject = document.getElementById("message");
-                var message = messageObject.value;
-                messageObject.value = '';
-                document.getElementById("message").value;
-                socket.emit('message', message);
-                var textnode = document.createTextNode(pseudo + ' ' + message);            
-                appendChild(textnode);
-                messageObject.focus();
-            }
+            $('#formulaire_chat').submit(function () {
+                var message = $('#message').val();
+                socket.emit('message', message); // Transmet le message aux autres
+                insereMessage(pseudo, message); // Affiche le message aussi sur notre page
+                $('#message').val('').focus(); // Vide la zone de Chat et remet le focus dessus
+                return false; // Permet de bloquer l'envoi "classique" du formulaire
+            });
 
-            function appendChild(child) {
-                var node = document.createElement("LI");
-                node.setAttribute("class", "message");
-                node.appendChild(child);
-                document.getElementById("Result").appendChild(node); 
+            function insereMessage(nickname, message) {
+                $('#result').prepend('<p><strong>' + nickname + '</strong> ' + message + '</p>');
             }
         </script>
     </body>
